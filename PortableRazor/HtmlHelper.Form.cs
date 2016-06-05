@@ -25,6 +25,20 @@ namespace PortableRazor.Web.Mvc
 			_writer.Write (form);
 			return new MvcForm (_writer, "form");
 		}
+
+        public MvcForm BeginForm(string actionName, string controllerName, PortableRazor.ViewBase.FormMethod method, object htmlAttributes = null)
+        {
+            switch (method)
+            {
+                case PortableRazor.ViewBase.FormMethod.Post:
+                    return BeginForm(actionName, controllerName, null, FormMethod.Post, htmlAttributes);
+                    break;
+                case PortableRazor.ViewBase.FormMethod.Get:
+                default:
+                    return BeginForm(actionName, controllerName, null, FormMethod.Get, htmlAttributes);
+                    break;
+            }
+        }
 	}
 }
 

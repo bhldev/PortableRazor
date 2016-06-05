@@ -1,21 +1,51 @@
-using System;
+﻿using System;
 using PortableRazor.Web;
 using PortableRazor.Web.Mvc;
+using System.Dynamic;
 
 namespace PortableRazor
 {
 	//This was copied from the generated .cs for one of the razor views
 	public abstract class ViewBase
 	{
-		private static string scheme;
+        /// <summary>
+        /// Note that Android does not currently support POST Body in IHybridWebView
+        /// See https://code.google.com/p/android/issues/detail?id=42790​
+        /// Therefore, POST requests must be encoded in the URL in the HTML
+        /// </summary>
+        public enum FormMethod
+        {
+            Get,
+            Post
+        }
+
+        private static string scheme;
 		public static string UrlScheme {
 			get { return scheme ?? "hybrid:"; }
 			set { scheme = value; }
 		}
 
-		public HtmlHelper Html { get; private set; }
+		public HtmlHelper Html { get; set; }
 
 		public UrlHelper Url { get; private set; }
+
+        /// <summary>
+        /// MVC Layout Definition
+        /// </summary>
+        public string Layout { get; set; }
+
+        /// <summary>
+        /// MVC ViewBag Definition
+        /// </summary>
+        protected dynamic _ViewBag;
+        public dynamic ViewBag
+        {
+            get
+            {
+                if (_ViewBag == null) _ViewBag = new ViewBagObject();
+                return _ViewBag;
+            }
+        }
 
 		// This field is OPTIONAL, but used by the default implementation of Generate, Write, WriteAttribute and WriteLiteral
 		//

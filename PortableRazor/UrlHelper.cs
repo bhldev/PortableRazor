@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
@@ -60,6 +63,24 @@ namespace PortableRazor.Web.Mvc
 
 			return qs.ToString (1, qs.Length - 1);
 		}
+
+        /// <summary>
+        /// http://stackoverflow.com/a/7596697
+        /// </summary>
+        /// <param name="dict"></param>
+        /// <returns></returns>
+        public static object GetObjectFromDict(IDictionary<string, object> dict)
+        {
+            var eo = new ExpandoObject();
+            var eoColl = (ICollection<KeyValuePair<string, object>>)eo;
+            foreach (var kvp in dict)
+            {
+                eoColl.Add(kvp);
+            }
+            dynamic eoDynamic = eo;
+            return eoDynamic.Property;
+        }
+        
 	}
 }
 

@@ -9,6 +9,19 @@ namespace PortableRazor.Web.Mvc
 	public partial class HtmlHelper {
 		private TextWriter _writer;
 
+        private dynamic _model;
+        public dynamic Model
+        {
+            get
+            {
+                return this._model;
+            }
+            set
+            {
+                this._model = value;
+            }
+        }
+
 		public HtmlHelper(TextWriter writer) {
 			_writer = writer;
 		}

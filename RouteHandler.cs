@@ -54,17 +54,53 @@ namespace PortableRazor
 
 			var parameters = resources.Length > 1 ? HttpUtility.ParseQueryString (resources [1]) : null;
 
-			var methodParams = method.GetParameters ();
-			var paramsIn = new object[methodParams.Length];
+            var methodParams = method.GetParameters();
 
-			foreach (var p in methodParams) 
-				paramsIn [Array.IndexOf (methodParams, p)] = parameters [p.Name] != null ? 
-					Convert.ChangeType (parameters [p.Name], p.ParameterType) : null;
-
-			method.Invoke (controller, paramsIn);
-
-			return true;
+            // If one length, potentially a model object. Attempt to instantiate and map
+            var paramsIn = new object[0];
+            if (methodParams.Length == 1)
+            {
+                try
+                {
+                    var modelType = methodParams[0].ParameterType;
+                    var modelParams = modelType.GetRuntimeProperties();
+                    paramsIn = new object[1];
+                    var model = Activator.CreateInstance(modelType);
+                    foreach (var p in modelParams)
+                    {
+                        if (parameters != null && parameters.ContainsKey(p.Name))
+                        {
+                            p.SetValueNullable(model, p.Name, parameters[p.Name]);
+                        }
+                    }
+                    paramsIn[0] = model;
+                }
+                catch
+                {
+                    paramsIn = GetControllerParameters(methodParams, parameters);
+                }
+            }
+            // Not a model object. Map and instantiate.
+            else
+            {
+                paramsIn = GetControllerParameters(methodParams, parameters);
+            }
+            method.Invoke(controller, paramsIn);
+            return true;
 		}
+
+        private static object[] GetControllerParameters(ParameterInfo[] methodParams, IDictionary<String, String> parameters)
+        {
+            var paramsIn = new object[methodParams.Length];
+            foreach (var p in methodParams)
+            {
+                if (parameters != null && parameters.ContainsKey(p.Name))
+                {
+                    paramsIn[Array.IndexOf(methodParams, p)] = Convert.ChangeType(parameters[p.Name], p.ParameterType);
+                }
+            }
+            return paramsIn;
+        }
 
 		private static MethodInfo GetRuntimeMethod(this Type type, string name) {
 			var methods = type.GetRuntimeMethods ();
